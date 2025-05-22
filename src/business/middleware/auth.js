@@ -1,28 +1,43 @@
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const SECRET_KEY = process.env.SECRET_KEY || "mi_secreto"; // Usar variable de entorno para mayor seguridad
+const Usuario = require('../../data/models/Usuario');
 
 // Middleware de autenticación
-const auth = (req, res, next) => {
-  const token = req.header("Authorization");
-  if (!token) return res.status(401).json({ error: "Acceso denegado" });
-
+const auth = async (req, res, next) => {
   try {
-    const decoded = jwt.verify(token.replace("Bearer ", ""), SECRET_KEY);
-    req.usuario = decoded;
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    
+    if (!token) {
+      throw new Error('No se proporcionó token de autenticación');
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'tu_jwt_secret');
+    const usuario = await Usuario.findById(decoded.id);
+
+    if (!usuario) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    req.usuario = usuario;
+    req.token = token;
     next();
-  } catch (err) {
-    console.error("Error al verificar el token:", err.message); // Agregar log para depuración
-    res.status(400).json({ error: "Token inválido" });
+  } catch (error) {
+    console.error('Error de autenticación:', error);
+    res.status(401).json({ error: 'Por favor autentícate correctamente' });
   }
 };
 
 // Middleware para verificar roles
-const verificarRol = (rolesPermitidos) => {
+const verificarRol = (roles) => {
   return (req, res, next) => {
-    if (!rolesPermitidos.includes(req.usuario.rol)) {
-      return res.status(403).json({ error: "No tienes permiso para acceder" });
+    if (!req.usuario) {
+      return res.status(401).json({ error: 'Usuario no autenticado' });
     }
+
+    if (!roles.includes(req.usuario.rol)) {
+      return res.status(403).json({ error: 'No tienes permiso para realizar esta acción' });
+    }
+
     next();
   };
 };

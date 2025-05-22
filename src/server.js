@@ -1,9 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const docentesRoutes = require('../src/presentation/routes/docentes');
-const materiasRoutes = require('../src/presentation/routes/materias');
+const materiasRoutes = require('../src/presentation/routes/Materias');
 const horariosRoutes =require('../src/presentation/routes/horarios');
 const authRoutes = require("./presentation/routes/auth"); 
+const initDataRoutes = require("./presentation/routes/init-data");
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
@@ -30,9 +31,12 @@ mongoose.connect('mongodb://localhost:27017/horarios', {
 }).then(() => console.log("MongoDB conectado"))
   .catch(err => console.log(err));
 
-app.use('/docentes', docentesRoutes);
-app.use('/materias', materiasRoutes);
-app.use("/horarios", horariosRoutes);
-app.use("/auth", authRoutes);
+// Rutas de la API
+app.use('/api/docentes', docentesRoutes);
+app.use('/api/materias', materiasRoutes);
+app.use("/api/horarios", horariosRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/init", initDataRoutes);
+
 const PORT = 5000;
 app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));

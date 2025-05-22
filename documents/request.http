@@ -1,2 +1,12 @@
 GET http://localhost:5000/
 Content-Type: application/json
+
+### Test POST /docentes with authentication
+POST http://localhost:5000/docentes
+Content-Type: application/json
+Authorization: Bearer <your_token_here>
+
+{
+  "nombre": "Juan Perez",
+  "materias": ["Matemáticas", "Física"]
+}

@@ -1,25 +1,35 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
-const User = require('./../src/data/models/Usuario'); // ajusta el path si es necesario
+const User = require('./../src/data/models/Usuario');
 
 mongoose.connect('mongodb://localhost:27017/horarios')
   .then(async () => {
-    const email = "estudiante@escuela.com"; // Cambiar correo para evitar conflictos
+    console.log('Conectado a MongoDB');
+    
+    const email = "director@test.com";
     const plainPassword = "password123";
-    const rol = "estudiante";
+    const rol = "director";
+    const nombre = "Director Principal";
 
+    console.log('Buscando usuario existente...');
     const exists = await User.findOne({ email });
     if (exists) {
       console.log("Ya existe un usuario con ese correo.");
       process.exit();
     }
 
-    const hashedPassword = await bcrypt.hash(plainPassword, 10);
-
-    const user = new User({ email, password: hashedPassword, rol });
+    console.log('Creando nuevo usuario...');
+    const user = new User({ 
+      email, 
+      password: plainPassword, // La contraseña se encriptará automáticamente por el middleware
+      rol,
+      nombre 
+    });
+    
+    console.log('Guardando usuario...');
     await user.save();
+    console.log('Usuario guardado:', user);
 
-    console.log("Usuario creado exitosamente");
+    console.log("Usuario director creado exitosamente");
     process.exit();
   })
   .catch(err => {
